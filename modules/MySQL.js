@@ -7,6 +7,7 @@ exports.connection = connection;
 exports.startConnection = () => {
     connection.connect(err => {
         if (err) {
+            //test
             console.log(err);
         } else {
             console.log('MySQL database connected');
