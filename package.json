@@ -5,9 +5,12 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./",
-    "start": "node server.js",
-    "precommit": "lint"
+    "start": "node server.js"
   },
+  "precommit.silent": true,
+  "pre-commit": [
+    "lint"
+  ],
   "keywords": [
     "RESTful",
     "API",
@@ -18,7 +21,10 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
-    "mysql": "^2.16.0"
+    "express-winston": "^3.0.1",
+    "mysql": "^2.16.0",
+    "utils-error-to-json": "^1.0.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "eslint": "^5.12.1",
