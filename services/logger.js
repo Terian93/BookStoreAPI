@@ -53,6 +53,7 @@ exports.expressLogger = app => {
     level: 'request',
     meta: true,
     msg: '[' + getDate() + '] >> { method:{{req.method}}, url:{{req.url}} }',
+    requestFilter: (req, propName) => req[propName],
     responseFilter: () => undefined
   }));
   app.use(expressWinston.logger({

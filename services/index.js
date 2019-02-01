@@ -1,10 +1,11 @@
 const sql = require('../modules/MySQL');
 const queries = require('../modules/MySQL').queries;
+const errorHandler = require('./errorHandler').errorHandler;
 
-// TODO: change all errors to throw for global error handler
 const bulkCreate = (inputArray, table, fields, res) => {
   if (inputArray.length === 0) {
-    res.send('Error: Empty array was send');
+    res.status(400);
+    res.send('Empty array was send');
     return false;
   }
   if (inputArray[0] instanceof Object && !(inputArray[0] instanceof Array)) {
@@ -13,46 +14,73 @@ const bulkCreate = (inputArray, table, fields, res) => {
     });
   }
   if (inputArray[0] instanceof Array) {
-    const connection = sql.newConnection();
-    connection.beginTransaction(err => {
+    sql.newConnection().then((connection, err) => {
       if (err) {
-        res.send('Failed to create new items to ' + table + ' table');
-        throw new Error('test');
+        console.log('errora');
+        res.status(503);
+        res.send('Cant reach MySQL database');
+        throw err;
       }
-      connection.query(
-        `INSERT INT ${table} (${fields}) VALUES ?`,
-        [inputArray],
-        err => {
-          if (err) {
-            connection.rollback(error => {
-              res.send('Failed to create new items to ' + table + ' table');
-              if (error !== null) {
-                throw error;
-              } else {
-                const newError = new Error('Querry error (id:' + connection.threadId + ') >> ' + err.message);
-                newError.name = 'Rollback';
-                throw newError;
-              }
-            });
-          }
-
-          connection.commit(err => {
+      connection.beginTransaction(err => {
+        if (err) {
+          res.status(500);
+          res.send('Failed to create new items to ' + table + ' table');
+          err.type = 'transaction error';
+          throw err;
+        }
+        connection.query(
+          `INSERT INT ${table} (${fields}) VALUES ?`,
+          [inputArray],
+          err => {
             if (err) {
-              connection.rollback((err) => {
+              connection.rollback(error => {
+                res.status(500);
                 res.send('Failed to create new items to ' + table + ' table');
-                throw err;
+                if (error !== null) {
+                  error.type = 'Query error';
+                  throw error;
+                } else {
+                  err.type = 'Query error';
+                  throw err;
+                }
               });
             }
-            if (!res.headersSent) {
-              res.write('Items added to ' + table);
-            }
-            sql.closeConnection(connection);
-          });
+
+            connection.commit(err => {
+              if (err) {
+                connection.rollback((err) => {
+                  res.status(500);
+                  res.send('Failed to create new items to ' + table + ' table');
+                  err.type = 'Transaction commit error';
+                  throw err;
+                });
+              }
+              if (!res.headersSent) {
+                res.send('Items added to ' + table);
+              }
+              sql.closeConnection(connection);
+            });
+          }
+        );
+      });
+    }).catch(err => {
+      if (err.type == null) {
+        err.type = 'MySQL error';
+      }
+      if (res.headersSent !== true) {
+        if (err.type === 'MySQL connection error') {
+          res.status(503);
+          res.send('Cant reach MySQL database');
+        } else {
+          res.status(500);
+          res.send('Unknown internal server error');
         }
-      );
+      }
+      errorHandler(err);
     });
   } else {
-    res.send('Error: Wrong data type was send in body');
+    res.status(400);
+    res.send('Wrong data type was send in body');
   }
 };
 

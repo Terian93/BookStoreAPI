@@ -1,24 +1,26 @@
 const mysql = require('mysql');
+const logger = require('../services/logger').default;
 const connectionData = require('../configs/MySQL').remoteConnectionData;
 
-exports.newConnection = () => {
+exports.newConnection = () => new Promise((resolve, reject) => {
   const connection = mysql.createConnection(connectionData);
   connection.connect(err => {
     if (err) {
-      console.log(err);
+      err.type = 'MySQL connection error';
+      reject(err);
     } else {
-      console.log('MySQL (id:' + connection.threadId + ') database connected');
+      logger.log('info', 'MySQL (id:' + connection.threadId + ') database connected');
+      resolve(connection);
     }
   });
-  return connection;
-};
+});
 
 exports.closeConnection = (connection) => {
   connection.end(err => {
     if (err) {
-      console.log(err);
+      throw err;
     } else {
-      console.log('MySQL (id:' + connection.threadId + ') database disconected');
+      logger.log('info', 'MySQL (id:' + connection.threadId + ') database disconected');
     }
   });
 };
