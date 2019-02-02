@@ -1,6 +1,6 @@
 const mysql = require('mysql');
 const logger = require('../services/logger').default;
-const connectionData = require('../configs/MySQL').rootConnectionData;
+const connectionData = require('../configs/MySQL').remoteConnectionData;
 
 exports.newConnection = () => new Promise((resolve, reject) => {
   const connection = mysql.createConnection(connectionData);
@@ -34,7 +34,7 @@ exports.queries = {
       `INSERT INTO authors (name)
       VALUES (?)`,
   selectAllBooksQuery:
-      `SELECT books.id, books.name, authors.name 
+      `SELECT books.id, books.name, authors.name, books.year
       FROM books, authors 
       WHERE books.author_id = authors.id
       ORDER BY books.id`,

@@ -7,7 +7,7 @@ exports.rootConnectionData = {
 };
 
 exports.remoteConnectionData = {
-  host: '192.168.0.211',
+  host: '192.168.0.210',
   user: 'remote',
   password: 'password',
   database: 'mydb'
