@@ -28,13 +28,13 @@ exports.closeConnection = (connection) => {
 // Queries
 exports.queries = {
   addBookQuery:
-      `INSERT INTO books (name, author_id, year)
-      VALUES (?, ?, ?)`,
+      `INSERT INTO books (name, author_id, year, description)
+      VALUES (?, ?, ?, ?)`,
   addAuthorQuery:
       `INSERT INTO authors (name)
       VALUES (?)`,
   selectAllBooksQuery:
-      `SELECT books.id, books.name, authors.name, books.year
+      `SELECT books.id, books.name, authors.name, books.year, books.description
       FROM books, authors 
       WHERE books.author_id = authors.id
       ORDER BY books.id`,
@@ -54,7 +54,7 @@ exports.queries = {
       ORDER BY id`,
   updateBookQuery:
       `UPDATE books
-      SET name = ?, author_id = ?, year = ?
+      SET name = ?, author_id = ?, year = ?, description = ?
       WHERE id = ?`,
   updateAuthorQuery:
       `UPDATE authors

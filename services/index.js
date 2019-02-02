@@ -86,11 +86,12 @@ const bulkCreate = (inputArray, table, fields, res) => {
 // Create
 exports.addBook = (req, res) => {
   if (req.body instanceof Array) {
-    bulkCreate(req.body, 'books', 'name, author_id, year', res);
+    bulkCreate(req.body, 'books', 'name, author_id, year, description', res);
   } else if (req.body instanceof Object) {
     const name = req.body.name;
     const authorId = req.body.author_id;
     const year = req.body.year;
+    const description = req.body.description;
 
     sql.newConnection().then((connection, err) => {
       if (err) {
@@ -105,7 +106,7 @@ exports.addBook = (req, res) => {
           err.type = 'transaction error';
           throw err;
         }
-        connection.query(queries.addBookQuery, [name, authorId, year], err => {
+        connection.query(queries.addBookQuery, [name, authorId, year, description], err => {
           if (err) {
             connection.rollback(error => {
               res.status(500);
@@ -492,6 +493,7 @@ exports.updateBook = (req, res) => {
   const name = req.body.name;
   const authorId = req.body.author_id;
   const year = req.body.year;
+  const description = req.body.description;
 
   sql.newConnection().then((connection, err) => {
     if (err) {
@@ -506,7 +508,7 @@ exports.updateBook = (req, res) => {
         err.type = 'transaction error';
         throw err;
       }
-      connection.query(queries.updateBookQuery, [name, authorId, year, id], (err) => {
+      connection.query(queries.updateBookQuery, [name, authorId, year, description, id], (err) => {
         if (err) {
           connection.rollback(error => {
             res.status(500);
