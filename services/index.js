@@ -228,6 +228,8 @@ exports.addAuthor = (req, res) => {
 
 // Read
 exports.listAllBooks = (req, res) => {
+  const startId = req.body.id;
+
   sql.newConnection().then((connection, err) => {
     if (err) {
       res.status(503);
@@ -241,7 +243,7 @@ exports.listAllBooks = (req, res) => {
         err.type = 'transaction error';
         throw err;
       }
-      connection.query(queries.selectAllBooksQuery, (err, rows) => {
+      connection.query(queries.selectAllBooksQuery, [startId], (err, rows) => {
         if (err) {
           connection.rollback(error => {
             res.status(500);
