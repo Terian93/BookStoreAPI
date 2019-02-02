@@ -1,6 +1,6 @@
 const mysql = require('mysql');
 const logger = require('../services/logger').default;
-const connectionData = require('../configs/MySQL').remoteConnectionData;
+const connectionData = require('../configs/MySQL').rootConnectionData;
 
 exports.newConnection = () => new Promise((resolve, reject) => {
   const connection = mysql.createConnection(connectionData);

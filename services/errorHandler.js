@@ -6,7 +6,7 @@ const errorHandler = (err) => {
   const errorType = err.type == null
     ? 'UNKNOWN'
     : err.type;
-  logger.default.log('error', errorType + ' >> ' + err.message, [json]);
+  logger.default.log('error', errorType + ' >> ' + err.message, { json });
 };
 
 const uncaughtExceptionsHandler = () => {
