@@ -42,9 +42,9 @@ exports.queries = {
   selectAllBooksQuery:
     `SELECT books.id, books.name, authors.name, books.year, books.description
     FROM books INNER JOIN authors ON books.author_id = authors.id
-    WHERE books.id > ?
     ORDER BY books.id
-    LIMIT 10`,
+    LIMIT 10
+    OFFSET ?`,
   selectAllAuthorsQuery:
     `SELECT *
     FROM authors

@@ -225,7 +225,7 @@ exports.addUserBooks = (req, res) => {
 
 // Read
 exports.listAllBooks = (req, res) => {
-  const startId = req.body.id;
+  const pageOffset = req.body.page * 10;
 
   sql.newConnection().then((connection, err) => {
     const data = {
@@ -235,7 +235,7 @@ exports.listAllBooks = (req, res) => {
       resErrorMessage: 'Failed to get items from books table',
       resFunction: (res, rows) => res.json(rows),
       queryString: queries.selectAllBooksQuery,
-      queryValues: [startId]
+      queryValues: [pageOffset]
     };
     queryTransaction(data);
   }).catch(err => connectionErrorHandler(err, res));
