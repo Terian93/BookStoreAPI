@@ -9,9 +9,11 @@ const bulkCreate = (inputArray, table, fields, res) => {
     return false;
   }
   if (inputArray[0] instanceof Object && !(inputArray[0] instanceof Array)) {
+    console.log(inputArray);
     inputArray.forEach((element, index) => {
       inputArray[index] = Object.values(element);
     });
+    console.log(inputArray);
   }
   if (inputArray[0] instanceof Array) {
     sql.newConnection().then((connection, err) => {
@@ -226,6 +228,161 @@ exports.addAuthor = (req, res) => {
   }
 };
 
+exports.addUser = (req, res) => {
+  if (req.body instanceof Array) {
+    bulkCreate(req.body, 'users', 'name', res);
+  } else if (req.body instanceof Object) {
+    const name = req.body.name;
+
+    sql.newConnection().then((connection, err) => {
+      if (err) {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+        throw err;
+      }
+      connection.beginTransaction(err => {
+        if (err) {
+          res.status(500);
+          res.send('Failed to create new items to users table');
+          err.type = 'transaction error';
+          throw err;
+        }
+        connection.query(queries.addUserQuery, [name], err => {
+          if (err) {
+            connection.rollback(error => {
+              res.status(500);
+              res.send('Failed to create new items to users table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          connection.commit(err => {
+            if (err) {
+              connection.rollback((error) => {
+                res.status(500);
+                res.send('Failed to create new items to users table');
+                if (error !== null) {
+                  error.type = 'Query error';
+                  throw error;
+                } else {
+                  err.type = 'Query error';
+                  throw err;
+                }
+              });
+            }
+            res.send('Item added to users');
+            sql.closeConnection(connection);
+          });
+        });
+      });
+    }).catch(err => {
+      if (err.type == null) {
+        err.type = 'MySQL error';
+      }
+      if (res.headersSent !== true) {
+        if (err.type === 'MySQL connection error') {
+          res.status(503);
+          res.send('Cant reach MySQL database');
+        } else {
+          res.status(500);
+          res.send('Unknown internal server error');
+        }
+      }
+      errorHandler(err);
+    });
+  } else {
+    res.send('Wrong body type');
+  }
+};
+
+exports.addUserBooks = (req, res) => {
+  const userId = req.params.id;
+  const bookId = req.body.id;
+
+  if (req.body instanceof Array) {
+    const data = req.body;
+    data.forEach((element, index) => {
+      data[index] = { book_id: element.id, user_id: userId };
+    });
+    console.log(data);
+    bulkCreate(
+      data,
+      'books_users',
+      'book_id, user_id',
+      res
+    );
+  } else if (req.body instanceof Object) {
+    sql.newConnection().then((connection, err) => {
+      if (err) {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+        throw err;
+      }
+      connection.beginTransaction(err => {
+        if (err) {
+          res.status(500);
+          res.send('Failed to create new items to books_users table');
+          err.type = 'transaction error';
+          throw err;
+        }
+        connection.query(queries.addBookToUserQuery, [bookId, userId], err => {
+          if (err) {
+            connection.rollback(error => {
+              res.status(500);
+              res.send('Failed to create new items to books_users table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          connection.commit(err => {
+            if (err) {
+              connection.rollback((error) => {
+                res.status(500);
+                res.send('Failed to create new items to books_users table');
+                if (error !== null) {
+                  error.type = 'Query error';
+                  throw error;
+                } else {
+                  err.type = 'Query error';
+                  throw err;
+                }
+              });
+            }
+            res.send('Item added to books_users');
+            sql.closeConnection(connection);
+          });
+        });
+      });
+    }).catch(err => {
+      if (err.type == null) {
+        err.type = 'MySQL error';
+      }
+      if (res.headersSent !== true) {
+        if (err.type === 'MySQL connection error') {
+          res.status(503);
+          res.send('Cant reach MySQL database');
+        } else {
+          res.status(500);
+          res.send('Unknown internal server error');
+        }
+      }
+      errorHandler(err);
+    });
+  } else {
+    res.send('Wrong body type');
+  }
+};
+
 // Read
 exports.listAllBooks = (req, res) => {
   const startId = req.body.id;
@@ -326,6 +483,70 @@ exports.listAllAuthors = (req, res) => {
             connection.rollback((error) => {
               res.status(500);
               res.send('Failed to get items from authors table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          res.json(rows);
+          sql.closeConnection(connection);
+        });
+      });
+    });
+  }).catch(err => {
+    if (err.type == null) {
+      err.type = 'MySQL error';
+    }
+    if (res.headersSent !== true) {
+      if (err.type === 'MySQL connection error') {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+      } else {
+        res.status(500);
+        res.send('Unknown internal server error');
+      }
+    }
+    errorHandler(err);
+  });
+};
+
+exports.listAllUsers = (req, res) => {
+  sql.newConnection().then((connection, err) => {
+    if (err) {
+      res.status(503);
+      res.send('Cant reach MySQL database');
+      throw err;
+    }
+    connection.beginTransaction(err => {
+      if (err) {
+        res.status(500);
+        res.send('Failed to get items from users table');
+        err.type = 'transaction error';
+        throw err;
+      }
+      connection.query(queries.selectAllUsersQuery, (err, rows) => {
+        if (err) {
+          connection.rollback(error => {
+            res.status(500);
+            res.send('Failed to get items from users table');
+            if (error !== null) {
+              error.type = 'Query error';
+              throw error;
+            } else {
+              err.type = 'Query error';
+              throw err;
+            }
+          });
+        }
+        connection.commit(err => {
+          if (err) {
+            connection.rollback((error) => {
+              res.status(500);
+              res.send('Failed to get items from users table');
               if (error !== null) {
                 error.type = 'Query error';
                 throw error;
@@ -458,6 +679,138 @@ exports.getAuthor = (req, res) => {
             connection.rollback((error) => {
               res.status(500);
               res.send('Failed to get item from authors table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          res.json(rows);
+          sql.closeConnection(connection);
+        });
+      });
+    });
+  }).catch(err => {
+    if (err.type == null) {
+      err.type = 'MySQL error';
+    }
+    if (res.headersSent !== true) {
+      if (err.type === 'MySQL connection error') {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+      } else {
+        res.status(500);
+        res.send('Unknown internal server error');
+      }
+    }
+    errorHandler(err);
+  });
+};
+
+exports.getUser = (req, res) => {
+  const id = req.params.id;
+
+  sql.newConnection().then((connection, err) => {
+    if (err) {
+      res.status(503);
+      res.send('Cant reach MySQL database');
+      throw err;
+    }
+    connection.beginTransaction(err => {
+      if (err) {
+        res.status(500);
+        res.send('Failed to get item from users table');
+        err.type = 'transaction error';
+        throw err;
+      }
+      connection.query(queries.selectUserQuery, [id], (err, rows) => {
+        if (err) {
+          connection.rollback(error => {
+            res.status(500);
+            res.send('Failed to get item from users table');
+            if (error !== null) {
+              error.type = 'Query error';
+              throw error;
+            } else {
+              err.type = 'Query error';
+              throw err;
+            }
+          });
+        }
+        connection.commit(err => {
+          if (err) {
+            connection.rollback((error) => {
+              res.status(500);
+              res.send('Failed to get item from users table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          res.json(rows);
+          sql.closeConnection(connection);
+        });
+      });
+    });
+  }).catch(err => {
+    if (err.type == null) {
+      err.type = 'MySQL error';
+    }
+    if (res.headersSent !== true) {
+      if (err.type === 'MySQL connection error') {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+      } else {
+        res.status(500);
+        res.send('Unknown internal server error');
+      }
+    }
+    errorHandler(err);
+  });
+};
+
+exports.getUserBooks = (req, res) => {
+  const id = req.params.id;
+
+  sql.newConnection().then((connection, err) => {
+    if (err) {
+      res.status(503);
+      res.send('Cant reach MySQL database');
+      throw err;
+    }
+    connection.beginTransaction(err => {
+      if (err) {
+        res.status(500);
+        res.send('Failed to get user books');
+        err.type = 'transaction error';
+        throw err;
+      }
+      connection.query(queries.selectUserBooksQuery, [id], (err, rows) => {
+        if (err) {
+          connection.rollback(error => {
+            res.status(500);
+            res.send('Failed to get user books');
+            if (error !== null) {
+              error.type = 'Query error';
+              throw error;
+            } else {
+              err.type = 'Query error';
+              throw err;
+            }
+          });
+        }
+        connection.commit(err => {
+          if (err) {
+            connection.rollback((error) => {
+              res.status(500);
+              res.send('Failed to get user books');
               if (error !== null) {
                 error.type = 'Query error';
                 throw error;
@@ -627,6 +980,141 @@ exports.updateAuthor = (req, res) => {
   });
 };
 
+exports.updateUser = (req, res) => {
+  const id = req.params.id;
+  const name = req.body.name;
+
+  sql.newConnection().then((connection, err) => {
+    if (err) {
+      res.status(503);
+      res.send('Cant reach MySQL database');
+      throw err;
+    }
+    connection.beginTransaction(err => {
+      if (err) {
+        res.status(500);
+        res.send('Failed to update item from users table');
+        err.type = 'transaction error';
+        throw err;
+      }
+      connection.query(queries.updateUserQuery, [name, id], (err) => {
+        if (err) {
+          connection.rollback(error => {
+            res.status(500);
+            res.send('Failed to update item from users table');
+            if (error !== null) {
+              error.type = 'Query error';
+              throw error;
+            } else {
+              err.type = 'Query error';
+              throw err;
+            }
+          });
+        }
+        connection.commit(err => {
+          if (err) {
+            connection.rollback((error) => {
+              res.status(500);
+              res.send('Failed to update item from users table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          res.send('User with id = ' + id + ' was updated');
+          sql.closeConnection(connection);
+        });
+      });
+    });
+  }).catch(err => {
+    if (err.type == null) {
+      err.type = 'MySQL error';
+    }
+    if (res.headersSent !== true) {
+      if (err.type === 'MySQL connection error') {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+      } else {
+        res.status(500);
+        res.send('Unknown internal server error');
+      }
+    }
+    errorHandler(err);
+  });
+};
+
+exports.updateUserBook = (req, res) => {
+  const userId = req.params.id;
+  const oldBookId = req.body.oldId;
+  const newBookId = req.body.newId;
+
+  sql.newConnection().then((connection, err) => {
+    if (err) {
+      res.status(503);
+      res.send('Cant reach MySQL database');
+      throw err;
+    }
+    connection.beginTransaction(err => {
+      if (err) {
+        res.status(500);
+        res.send('Failed to update item from books_users table');
+        err.type = 'transaction error';
+        throw err;
+      }
+      connection.query(queries.updateUserBookQuery, [newBookId, userId, oldBookId], (err) => {
+        if (err) {
+          connection.rollback(error => {
+            res.status(500);
+            res.send('Failed to update item from books_users table');
+            if (error !== null) {
+              error.type = 'Query error';
+              throw error;
+            } else {
+              err.type = 'Query error';
+              throw err;
+            }
+          });
+        }
+        connection.commit(err => {
+          if (err) {
+            connection.rollback((error) => {
+              res.status(500);
+              res.send('Failed to update item from books_users table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          res.send('Book was updated for user with id = ' + userId);
+          sql.closeConnection(connection);
+        });
+      });
+    });
+  }).catch(err => {
+    if (err.type == null) {
+      err.type = 'MySQL error';
+    }
+    if (res.headersSent !== true) {
+      if (err.type === 'MySQL connection error') {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+      } else {
+        res.status(500);
+        res.send('Unknown internal server error');
+      }
+    }
+    errorHandler(err);
+  });
+};
+
 // Delete
 exports.removeBook = (req, res) => {
   const id = req.params.id;
@@ -739,6 +1227,139 @@ exports.removeAuthor = (req, res) => {
             });
           }
           res.send('Author with id = ' + id + ' was removed');
+          sql.closeConnection(connection);
+        });
+      });
+    });
+  }).catch(err => {
+    if (err.type == null) {
+      err.type = 'MySQL error';
+    }
+    if (res.headersSent !== true) {
+      if (err.type === 'MySQL connection error') {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+      } else {
+        res.status(500);
+        res.send('Unknown internal server error');
+      }
+    }
+    errorHandler(err);
+  });
+};
+
+exports.removeUser = (req, res) => {
+  const id = req.params.id;
+
+  sql.newConnection().then((connection, err) => {
+    if (err) {
+      res.status(503);
+      res.send('Cant reach MySQL database');
+      throw err;
+    }
+    connection.beginTransaction(err => {
+      if (err) {
+        res.status(500);
+        res.send('Failed to remove item from users table');
+        err.type = 'transaction error';
+        throw err;
+      }
+      connection.query(queries.removeUserQuery, [id], (err) => {
+        if (err) {
+          connection.rollback(error => {
+            res.status(500);
+            res.send('Failed to remove item from users table');
+            if (error !== null) {
+              error.type = 'Query error';
+              throw error;
+            } else {
+              err.type = 'Query error';
+              throw err;
+            }
+          });
+        }
+        connection.commit(err => {
+          if (err) {
+            connection.rollback((error) => {
+              res.status(500);
+              res.send('Failed to remove item from users table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          res.send('User with id = ' + id + ' was removed');
+          sql.closeConnection(connection);
+        });
+      });
+    });
+  }).catch(err => {
+    if (err.type == null) {
+      err.type = 'MySQL error';
+    }
+    if (res.headersSent !== true) {
+      if (err.type === 'MySQL connection error') {
+        res.status(503);
+        res.send('Cant reach MySQL database');
+      } else {
+        res.status(500);
+        res.send('Unknown internal server error');
+      }
+    }
+    errorHandler(err);
+  });
+};
+
+exports.removeUserBook = (req, res) => {
+  const bookId = req.body.id;
+  const userId = req.params.id;
+
+  sql.newConnection().then((connection, err) => {
+    if (err) {
+      res.status(503);
+      res.send('Cant reach MySQL database');
+      throw err;
+    }
+    connection.beginTransaction(err => {
+      if (err) {
+        res.status(500);
+        res.send('Failed to remove item from books_users table');
+        err.type = 'transaction error';
+        throw err;
+      }
+      connection.query(queries.removeUserBookQuery, [bookId, userId], (err) => {
+        if (err) {
+          connection.rollback(error => {
+            res.status(500);
+            res.send('Failed to remove item from books_users table');
+            if (error !== null) {
+              error.type = 'Query error';
+              throw error;
+            } else {
+              err.type = 'Query error';
+              throw err;
+            }
+          });
+        }
+        connection.commit(err => {
+          if (err) {
+            connection.rollback((error) => {
+              res.status(500);
+              res.send('Failed to remove item from books_users table');
+              if (error !== null) {
+                error.type = 'Query error';
+                throw error;
+              } else {
+                err.type = 'Query error';
+                throw err;
+              }
+            });
+          }
+          res.send('Book was removed from user with id = ' + userId);
           sql.closeConnection(connection);
         });
       });
