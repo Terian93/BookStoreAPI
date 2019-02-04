@@ -119,20 +119,20 @@ const connectionErrorHandler = (err, res) => {
 // Create
 exports.addBook = (req, res) => {
   if (req.body instanceof Array) {
-    res.body.forEach(element => {
-      if (
-        !(element.name instanceof String) ||
-        !(element.author_id instanceof Number) ||
-        !(element.year instanceof Number) ||
-        !(element.description instanceof String)
-      ) {
-        res.status(400);
-        res.send('Wrong data type in body');
-        const err = new Error('Wrong data type in body');
-        err.type = 'Wrong type error';
-        throw err;
-      }
-    });
+    // res.body.forEach(element => {
+    //   if (
+    //     !(element.name instanceof String) ||
+    //     !(element.author_id instanceof Number) ||
+    //     !(element.year instanceof Number) ||
+    //     !(element.description instanceof String)
+    //   ) {
+    //     res.status(400);
+    //     res.send('Wrong data type in body');
+    //     const err = new Error('Wrong data type in body');
+    //     err.type = 'Wrong type error';
+    //     throw err;
+    //   }
+    // });
     bulkCreate(req.body, 'books', 'name, author_id, year, description', res);
   } else if (req.body instanceof Object) {
     const name = req.body.name;
@@ -140,18 +140,18 @@ exports.addBook = (req, res) => {
     const year = req.body.year;
     const description = req.body.description;
 
-    if (
-      !(name instanceof String) ||
-      !(authorId instanceof Number) ||
-      !(year instanceof Number) ||
-      !(description instanceof String)
-    ) {
-      res.status(400);
-      res.send('Wrong data type in body');
-      const err = new Error('Wrong data type in body');
-      err.type = 'Wrong type error';
-      throw err;
-    }
+    // if (
+    //   !(name instanceof String) ||
+    //   !(authorId instanceof Number) ||
+    //   !(year instanceof Number) ||
+    //   !(description instanceof String)
+    // ) {
+    //   res.status(400);
+    //   res.send('Wrong data type in body');
+    //   const err = new Error('Wrong data type in body');
+    //   err.type = 'Wrong type error';
+    //   throw err;
+    // }
 
     sql.newConnection().then((connection, err) => {
       const data = {
@@ -176,30 +176,30 @@ exports.addBook = (req, res) => {
 
 exports.addAuthor = (req, res) => {
   if (req.body instanceof Array) {
-    res.body.forEach(element => {
-      if (
-        !(element.name instanceof String)
-      ) {
-        res.status(400);
-        res.send('Wrong data type in body');
-        const err = new Error('Wrong data type in body');
-        err.type = 'Wrong type error';
-        throw err;
-      }
-    });
+    // res.body.forEach(element => {
+    //   if (
+    //     !(element.name instanceof String)
+    //   ) {
+    //     res.status(400);
+    //     res.send('Wrong data type in body');
+    //     const err = new Error('Wrong data type in body');
+    //     err.type = 'Wrong type error';
+    //     throw err;
+    //   }
+    // });
     bulkCreate(req.body, 'authors', 'name', res);
   } else if (req.body instanceof Object) {
     const name = req.body.name;
 
-    if (
-      !(name instanceof String)
-    ) {
-      res.status(400);
-      res.send('Wrong data type in body');
-      const err = new Error('Wrong data type in body');
-      err.type = 'Wrong type error';
-      throw err;
-    }
+    // if (
+    //   !(name instanceof String)
+    // ) {
+    //   res.status(400);
+    //   res.send('Wrong data type in body');
+    //   const err = new Error('Wrong data type in body');
+    //   err.type = 'Wrong type error';
+    //   throw err;
+    // }
 
     sql.newConnection().then((connection, err) => {
       const data = {
@@ -224,30 +224,30 @@ exports.addAuthor = (req, res) => {
 
 exports.addUser = (req, res) => {
   if (req.body instanceof Array) {
-    res.body.forEach(element => {
-      if (
-        !(element.name instanceof String)
-      ) {
-        res.status(400);
-        res.send('Wrong data type in body');
-        const err = new Error('Wrong data type in body');
-        err.type = 'Wrong type error';
-        throw err;
-      }
-    });
+    // res.body.forEach(element => {
+    //   if (
+    //     !(element.name instanceof String)
+    //   ) {
+    //     res.status(400);
+    //     res.send('Wrong data type in body');
+    //     const err = new Error('Wrong data type in body');
+    //     err.type = 'Wrong type error';
+    //     throw err;
+    //   }
+    // });
     bulkCreate(req.body, 'users', 'name', res);
   } else if (req.body instanceof Object) {
     const name = req.body.name;
 
-    if (
-      !(name instanceof String)
-    ) {
-      res.status(400);
-      res.send('Wrong data type in body');
-      const err = new Error('Wrong data type in body');
-      err.type = 'Wrong type error';
-      throw err;
-    }
+    // if (
+    //   !(name instanceof String)
+    // ) {
+    //   res.status(400);
+    //   res.send('Wrong data type in body');
+    //   const err = new Error('Wrong data type in body');
+    //   err.type = 'Wrong type error';
+    //   throw err;
+    // }
 
     sql.newConnection().then((connection, err) => {
       const data = {
@@ -278,18 +278,18 @@ exports.addUserBooks = (req, res) => {
     data.forEach((element, index) => {
       data[index] = { book_id: element.id, user_id: userId };
     });
-    data.forEach(element => {
-      if (
-        !(element.book_id instanceof Number) ||
-        !(element.user_id instanceof Number)
-      ) {
-        res.status(400);
-        res.send('Wrong data type in body');
-        const err = new Error('Wrong data type in body');
-        err.type = 'Wrong type error';
-        throw err;
-      }
-    });
+    // data.forEach(element => {
+    //   if (
+    //     !(element.book_id instanceof Number) ||
+    //     !(element.user_id instanceof Number)
+    //   ) {
+    //     res.status(400);
+    //     res.send('Wrong data type in body');
+    //     const err = new Error('Wrong data type in body');
+    //     err.type = 'Wrong type error';
+    //     throw err;
+    //   }
+    // });
     bulkCreate(
       data,
       'books_users',
@@ -299,15 +299,15 @@ exports.addUserBooks = (req, res) => {
   } else if (req.body instanceof Object) {
     const bookId = req.body.id;
 
-    if (
-      !(bookId instanceof Number)
-    ) {
-      res.status(400);
-      res.send('Wrong data type in body');
-      const err = new Error('Wrong data type in body');
-      err.type = 'Wrong type error';
-      throw err;
-    }
+    // if (
+    //   !(bookId instanceof Number)
+    // ) {
+    //   res.status(400);
+    //   res.send('Wrong data type in body');
+    //   const err = new Error('Wrong data type in body');
+    //   err.type = 'Wrong type error';
+    //   throw err;
+    // }
 
     sql.newConnection().then((connection, err) => {
       const data = {
@@ -332,17 +332,7 @@ exports.addUserBooks = (req, res) => {
 
 // Read
 exports.listAllBooks = (req, res) => {
-  if (
-    !(req.body.page instanceof Number)
-  ) {
-    res.status(400);
-    res.send('Wrong data type in body');
-    const err = new Error('Wrong data type in body');
-    err.type = 'Wrong type error';
-    throw err;
-  }
-
-  const pageOffset = req.body.page * 10;
+  const pageOffset = req.body.page * 10 - 10;
 
   sql.newConnection().then((connection, err) => {
     const data = {
@@ -464,18 +454,18 @@ exports.updateBook = (req, res) => {
   const year = req.body.year;
   const description = req.body.description;
 
-  if (
-    !(name instanceof String) ||
-    !(authorId instanceof Number) ||
-    !(year instanceof Number) ||
-    !(description instanceof String)
-  ) {
-    res.status(400);
-    res.send('Wrong data type in body');
-    const err = new Error('Wrong data type in body');
-    err.type = 'Wrong type error';
-    throw err;
-  }
+  // if (
+  //   !(name instanceof String) ||
+  //   !(authorId instanceof Number) ||
+  //   !(year instanceof Number) ||
+  //   !(description instanceof String)
+  // ) {
+  //   res.status(400);
+  //   res.send('Wrong data type in body');
+  //   const err = new Error('Wrong data type in body');
+  //   err.type = 'Wrong type error';
+  //   throw err;
+  // }
 
   sql.newConnection().then((connection, err) => {
     const data = {
@@ -495,15 +485,15 @@ exports.updateAuthor = (req, res) => {
   const id = req.params.id;
   const name = req.body.name;
 
-  if (
-    !(name instanceof String)
-  ) {
-    res.status(400);
-    res.send('Wrong data type in body');
-    const err = new Error('Wrong data type in body');
-    err.type = 'Wrong type error';
-    throw err;
-  }
+  // if (
+  //   !(name instanceof String)
+  // ) {
+  //   res.status(400);
+  //   res.send('Wrong data type in body');
+  //   const err = new Error('Wrong data type in body');
+  //   err.type = 'Wrong type error';
+  //   throw err;
+  // }
 
   sql.newConnection().then((connection, err) => {
     const data = {
@@ -523,15 +513,15 @@ exports.updateUser = (req, res) => {
   const id = req.params.id;
   const name = req.body.name;
 
-  if (
-    !(name instanceof String)
-  ) {
-    res.status(400);
-    res.send('Wrong data type in body');
-    const err = new Error('Wrong data type in body');
-    err.type = 'Wrong type error';
-    throw err;
-  }
+  // if (
+  //   !(name instanceof String)
+  // ) {
+  //   res.status(400);
+  //   res.send('Wrong data type in body');
+  //   const err = new Error('Wrong data type in body');
+  //   err.type = 'Wrong type error';
+  //   throw err;
+  // }
 
   sql.newConnection().then((connection, err) => {
     const data = {
@@ -552,16 +542,16 @@ exports.updateUserBook = (req, res) => {
   const oldBookId = req.body.oldId;
   const newBookId = req.body.newId;
 
-  if (
-    !(oldBookId instanceof Number) ||
-    !(newBookId instanceof Number)
-  ) {
-    res.status(400);
-    res.send('Wrong data type in body');
-    const err = new Error('Wrong data type in body');
-    err.type = 'Wrong type error';
-    throw err;
-  }
+  // if (
+  //   !(oldBookId instanceof Number) ||
+  //   !(newBookId instanceof Number)
+  // ) {
+  //   res.status(400);
+  //   res.send('Wrong data type in body');
+  //   const err = new Error('Wrong data type in body');
+  //   err.type = 'Wrong type error';
+  //   throw err;
+  // }
 
   sql.newConnection().then((connection, err) => {
     const data = {
@@ -633,16 +623,16 @@ exports.removeUserBook = (req, res) => {
   const bookId = req.body.id;
   const userId = req.params.id;
 
-  if (
-    !(bookId instanceof Number) ||
-    !(userId instanceof Number)
-  ) {
-    res.status(400);
-    res.send('Wrong data type in body');
-    const err = new Error('Wrong data type in body');
-    err.type = 'Wrong type error';
-    throw err;
-  }
+  // if (
+  //   !(bookId instanceof Number) ||
+  //   !(userId instanceof Number)
+  // ) {
+  //   res.status(400);
+  //   res.send('Wrong data type in body');
+  //   const err = new Error('Wrong data type in body');
+  //   err.type = 'Wrong type error';
+  //   throw err;
+  // }
 
   sql.newConnection().then((connection, err) => {
     const data = {
