@@ -22,6 +22,7 @@
   "dependencies": {
     "express": "^4.16.4",
     "express-winston": "^3.0.1",
+    "mongoose": "^5.4.9",
     "mysql": "^2.16.0",
     "utils-error-to-json": "^1.0.0",
     "winston": "^3.2.1"
