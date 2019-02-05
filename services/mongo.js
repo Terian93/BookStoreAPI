@@ -65,7 +65,13 @@ exports.listAllBooks = (req, res) => {
 exports.getBook = (req, res) => {
   const id = mongoose.Types.ObjectId(req.params.id);
 
-  Book.findById(id, (err, book) => {
+  Book.aggregate([
+    {
+      $match: {
+        _id: id
+      }
+    }
+  ], (err, book) => {
     if (err) {
       err.type = 'mongoose findById() error';
       res.status(500);
@@ -74,6 +80,16 @@ exports.getBook = (req, res) => {
     }
     res.send(book);
   });
+
+  // Book.findById(id, (err, book) => {
+  //   if (err) {
+  //     err.type = 'mongoose findById() error';
+  //     res.status(500);
+  //     res.send('Cant get book from colection');
+  //     throw err;
+  //   }
+  //   res.send(book);
+  // });
 };
 
 // Update
